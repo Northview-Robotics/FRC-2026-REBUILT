@@ -13,7 +13,7 @@ import edu.wpi.first.units.measure.Velocity;
 
 public final class Constants {
     
-    public final static class IntakeRollers{
+    public final static class IntakeRollersConstants{
         public static final int intakeRollerID = 51;
         public static final double gearRatio = 3.0/2.0;
 

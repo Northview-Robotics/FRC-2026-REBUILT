@@ -36,7 +36,7 @@ public class IntakeRollers extends SubsystemBase{
     private final VoltageOut voltCtrl = new VoltageOut(0);
     private final MotionMagicVelocityVoltage velCtrl = 
         new MotionMagicVelocityVoltage(0)
-        .withAcceleration(Constants.IntakeRollers.acceleration);
+        .withAcceleration(Constants.IntakeRollersConstants.acceleration);
 
     private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -74,9 +74,9 @@ public class IntakeRollers extends SubsystemBase{
                 .withKA(0.0);
 
         motorConfig.MotionMagic
-            .withMotionMagicCruiseVelocity(Constants.IntakeRollers.cruiseVelocity)
-            .withMotionMagicAcceleration(Constants.IntakeRollers.acceleration)
-            .withMotionMagicJerk(Constants.IntakeRollers.jerk);
+            .withMotionMagicCruiseVelocity(Constants.IntakeRollersConstants.cruiseVelocity)
+            .withMotionMagicAcceleration(Constants.IntakeRollersConstants.acceleration)
+            .withMotionMagicJerk(Constants.IntakeRollersConstants.jerk);
 
         motor.getConfigurator().apply(motorConfig);
     }
