@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.IntakeAngle;
 import frc.robot.subsystems.IntakeRollers;
 
@@ -19,7 +20,8 @@ public class RobotContainer {
 
   private final IntakeRollers intakeRollers = new IntakeRollers(Constants.IntakeRollersConstants.intakeRollerID, Constants.IntakeRollersConstants.gearRatio);
   private final IntakeAngle intakeAngle = new IntakeAngle(Constants.IntakePivotConstants.intakePivotID, Constants.IntakePivotConstants.gearRatio);
-
+  private final Indexer indexer = new Indexer(Constants.IndexerConstants.indexerID, Constants.IndexerConstants.gearRatio);
+  
   public RobotContainer() {
     configureBindings();
   }
@@ -31,6 +33,8 @@ public class RobotContainer {
     
     operatorCtrl.x().onTrue(intakeAngle.setPositionCmd(Degrees.of(0)));
     operatorCtrl.y().onTrue(intakeAngle.setPositionCmd(Degrees.of(90)));
+
+    operatorCtrl.povUpRight().whileTrue(indexer.setVoltageCmd(Volts.of(6)));//idk sigmasigmasigmasigma
   }
 
   public Command getAutonomousCommand() {

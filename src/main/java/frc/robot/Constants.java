@@ -47,6 +47,16 @@ public final class Constants {
         public static final AngularVelocity cruiseVelocity = RotationsPerSecond.of(3);
         public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(6);
         public static final Angle allowedError = Rotations.of(0.5);
+
+    }
+
+    public final static class IndexerConstants{
+        public static final int indexerID = 52;
+        public static final double gearRatio = 3.0/1.0;
+
+        public static final AngularVelocity cruiseVelocity = Rotations.per(Minute).of(3000);
+        public static final AngularAcceleration acceleration = Rotations.per(Minute).per(Second).of(6000);
+        public static final Velocity<AngularAccelerationUnit> jerk = Rotations.per(Minute).per(Second).per(Second).of(12000);
     }
 
 }
