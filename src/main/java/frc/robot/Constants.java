@@ -2,14 +2,17 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Minute;
-import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
+import com.pathplanner.lib.config.PIDConstants;
+
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -17,6 +20,20 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Velocity;
 
 public final class Constants {
+
+    public final static class SwerveConstants{
+        public static final double maxDriveSpeed = Units.feetToMeters(14);
+        public static final double maxAcceleration = 5;
+        public static final double deadband = 0.05;
+
+        public static final class Rotation {
+            public static final PIDConstants PID = new PIDConstants(0.4, 0.0, 0);
+        }
+
+        public static final class Translation {
+            public static final PIDConstants PID = new PIDConstants(5.0, 0.0, 0.0);
+        }
+    }
     
     public final static class IntakeRollersConstants{
         public static final int intakeRollerID = 51;
