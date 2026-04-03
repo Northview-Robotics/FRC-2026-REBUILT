@@ -60,7 +60,7 @@ public class Feeder extends SubsystemBase {
 
         motorConfig.MotorOutput
             .withNeutralMode(NeutralModeValue.Brake)
-            //TODO Adjust Inverted based on irl indexer
+            //TODO Adjust Inverted based on irl feeder
             .withInverted(InvertedValue.Clockwise_Positive);
 
         motorConfig.Feedback

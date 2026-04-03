@@ -44,7 +44,7 @@ public class Hood extends SubsystemBase{
             Volts.of(0.5).per(Second), 
             Volts.of(2), 
             Seconds.of(5), 
-            (state) -> Logger.recordOutput("Intake Angle State", state.toString())), 
+            (state) -> Logger.recordOutput("Hood State", state.toString())), 
             
         new SysIdRoutine.Mechanism(this::setVoltage, null, this)
     );
