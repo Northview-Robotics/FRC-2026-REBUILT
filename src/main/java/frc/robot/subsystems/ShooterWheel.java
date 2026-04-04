@@ -18,6 +18,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -42,6 +43,8 @@ public class ShooterWheel extends SubsystemBase {
     private final VoltageOut voltCtrl = new VoltageOut(0);
     private final MotionMagicVelocityVoltage velCtrl = new MotionMagicVelocityVoltage(0)
             .withAcceleration(Constants.ShooterWheelConstants.acceleration);
+    
+    private double targetRPM = 0.0;
 
     private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
@@ -125,16 +128,29 @@ public class ShooterWheel extends SubsystemBase {
         return motor1.getPosition().getValue();
     }
 
-    public void shoot(){
+    @AutoLogOutput
+    public double getTargetRPM() {
+        return targetRPM;
+    }
+
+    public void shoot(double distance){
         //Use LUT here
+        targetRPM = Constants.ShootLUT.map.get(distance).flywheelRPM(); // Example distance
+        setVelocity(targetRPM);
     }
 
     public void setVoltage(Voltage volts) {
         motor1.setControl(voltCtrl.withOutput(volts));
     }
 
-    public void setVelocity(AngularVelocity velocity) {
-        motor1.setControl(velCtrl.withVelocity(velocity));
+    public void setVelocity(double rpm) {
+        targetRPM = rpm;
+        motor1.setControl(velCtrl.withVelocity(targetRPM / 60.0));
+    }
+
+    public boolean isAtTargetSpeed() {
+        double currentRPM = motor1.getVelocity().getValue().in(Units.RPM);
+        return Math.abs(currentRPM - targetRPM) < Constants.ShooterWheelConstants.acceptableDeltaRPM;
     }
 
     private double getError() {
@@ -159,9 +175,15 @@ public class ShooterWheel extends SubsystemBase {
                 () -> setVoltage(Volts.zero()));
     }
 
-    public Command setVelocityCmd(AngularVelocity velocity) {
+    public Command setVelocityCmd(double velocity) {
         return this.runEnd(
                 () -> setVelocity(velocity),
+                () -> setVoltage(Volts.zero()));
+    }
+
+    public Command shootCmd(double distance) {
+        return this.runEnd(
+                () -> shoot(distance),
                 () -> setVoltage(Volts.zero()));
     }
 }

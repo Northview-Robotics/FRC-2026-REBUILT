@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Minute;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Second;
@@ -38,6 +39,8 @@ public class Hood extends SubsystemBase{
     private final SparkMax motor;
     private final SparkMaxConfig config = new SparkMaxConfig();
     private final SparkClosedLoopController closedLoopController;
+
+    double targetAngle = 0.0;
 
     private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -109,8 +112,14 @@ public class Hood extends SubsystemBase{
         return Rotations.of(motor.getEncoder().getPosition());
     }
 
-    public boolean isAtAngle(Angle targetAngle){
-        return Math.abs(getPosition().in(Rotations) - targetAngle.in(Rotations)) < Constants.IntakePivotConstants.allowedError.in(Rotations);
+    public void setShootAngle(double distance) {
+        // Use LUT here
+        targetAngle = Constants.ShootLUT.map.get(distance).hoodAngle(); // Example distance
+        setPosition(Degrees.of(targetAngle));
+    }
+
+    public boolean isAtAngle(){
+        return Math.abs(getPosition().in(Rotations) - Degrees.of(targetAngle).in(Rotations)) < Constants.IntakePivotConstants.allowedError.in(Rotations);
     }
 
     public void setVoltage(Voltage volts){
@@ -156,4 +165,11 @@ public class Hood extends SubsystemBase{
             () -> setPosition(position.get()), 
             () -> setVoltage(Volts.zero()));
     }
+
+    public Command setShootAngleCmd(double distance){
+        return this.runEnd(
+            () -> setShootAngle(distance), 
+            () -> setVoltage(Volts.zero()));
+    }
+
 }

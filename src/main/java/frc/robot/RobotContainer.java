@@ -5,7 +5,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
 import java.io.File;
@@ -93,7 +92,7 @@ public class RobotContainer {
     operatorCtrl.povUpRight().whileTrue(indexer.setVoltageCmd(Volts.of(6)));// idk sigmasigmasigmasigma
     
     // TOOD: Constant RPM. Use Double Supplier with shootermap at some point
-    operatorCtrl.rightBumper().whileTrue(shooterWheel.setVelocityCmd(RPM.of(2000)));
+    // operatorCtrl.rightBumper().whileTrue(shooterWheel.setVelocityCmd(2000));
 
     // Example shooting command
     // Our shoot cmd should look something like this
@@ -108,6 +107,12 @@ public class RobotContainer {
     //         .withName("ShootCmd"));
 
     //TODO configure other bindings after zain gives button map
+
+    operatorCtrl.rightBumper().whileTrue(Commands.sequence(
+        Commands.parallel(shooterWheel.shootCmd(2.0),hood.setShootAngleCmd(2.0)),
+        Commands.waitUntil(shooterWheel::isAtTargetSpeed).alongWith(Commands.waitUntil(hood::isAtAngle)),
+        Commands.parallel(indexer.setVelocityCmd(Constants.IndexerConstants.defaultAngularVelocity), feeder.setVelocityCmd(Constants.FeederConstants.defaultAngularVelocity))
+    ).withName("ShootCmd"));
   }
 
   public Command getAutonomousCommand() {

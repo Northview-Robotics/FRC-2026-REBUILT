@@ -10,9 +10,12 @@ import static edu.wpi.first.units.Units.Second;
 
 import com.pathplanner.lib.config.PIDConstants;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-
+import edu.wpi.first.math.interpolation.Interpolatable;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
@@ -91,6 +94,8 @@ public final class Constants {
         public static final AngularAcceleration acceleration = Rotations.per(Minute).per(Second).of(6000);
         public static final Velocity<AngularAccelerationUnit> jerk = Rotations.per(Minute).per(Second).per(Second).of(12000);
 
+        public static final AngularVelocity defaultAngularVelocity = Rotations.per(Minute).of(3000);
+
         public static final double ejectCurrent = 160;
         public static final double ejectTimeout = 0.1;
         public static final double ejectRPM = -10;
@@ -103,6 +108,8 @@ public final class Constants {
         //TODO Adjust Current Limit based on irl feeder
         public static final Current supplyCurrentLimit = Amps.of(80);
         public static final Current statorCurrentLimit = Amps.of(120);
+
+        public static final AngularVelocity defaultAngularVelocity = Rotations.per(Minute).of(3000);
     }
 
     public final static class ShooterWheelConstants {
@@ -117,12 +124,16 @@ public final class Constants {
         public static final Current supplyCurrentLimit = Amps.of(80);
         public static final Current statorCurrentLimit = Amps.of(140);
 
+        //TODO Maybe adjust this value based on how consistent the shooter is. This is the acceptable error in RPM for the shooter to be considered at the target speed.
+        public static final double acceptableDeltaRPM = 50;
+
         public static final AngularVelocity cruiseVelocity = Rotations.per(Minute).of(1000);
         // TODO: The old code used RP/s^2 so im using it here. Maybe change this
         public static final AngularAcceleration acceleration = Rotations.per(Second).per(Second).of(2500);
         public static final Velocity<AngularAccelerationUnit> jerk = Rotations.per(Minute).per(Second).per(Second).of(12000);
 
         public static final AngularVelocity shootingTolerance = Rotations.per(Minute).of(50);
+
     }
 
     public final static class HoodConstants{
@@ -144,6 +155,26 @@ public final class Constants {
         public static final AngularVelocity cruiseVelocity = RotationsPerSecond.of(1.5);
         public static final AngularAcceleration maxAcceleration = RotationsPerSecondPerSecond.of(3);
         public static final Angle allowedError = Rotations.of(0.5);
+    }
+
+    public final static class ShootLUT {
+        public record ShooterParams(double flywheelRPM, double hoodAngle, double tof) implements Interpolatable<ShooterParams> {
+        public ShooterParams interpolate(ShooterParams endValue, double t) {
+            return new ShooterParams(
+                MathUtil.interpolate(flywheelRPM(), endValue.flywheelRPM(), t),
+                MathUtil.interpolate(hoodAngle(), endValue.hoodAngle(), t),
+                MathUtil.interpolate(tof(), endValue.tof(), t));
+            }
+        }
+
+        public static final InterpolatingTreeMap<Double, ShooterParams> map = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), ShooterParams::interpolate);
+        static {
+            //TODO Fill this LUT with actual values. The distance is in meters, flywheelRPM is in RPM, hoodAngle is in degrees, and tof is in seconds.
+            //map.put(distance, new ShooterParams(flywheelRPM, hoodAngle, tof));
+            map.put(1.0, new ShooterParams(1000, 10, 1.0));
+            map.put(2.0, new ShooterParams(2000, 20, 1.5));
+            map.put(3.0, new ShooterParams(3000, 30, 2.0));
+        }
     }
 
 }
