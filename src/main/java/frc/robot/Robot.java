@@ -9,13 +9,17 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+// import frc.robot.subsystems.Telemetry;
 
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  // private Telemetry telemetry = new Telemetry();
 
   public Robot() {
     Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
@@ -33,6 +37,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    // telemetry.update();
+    SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
+    Logger.recordOutput("Match Timer", DriverStation.getMatchTime());
   }
 
   @Override

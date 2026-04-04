@@ -11,11 +11,17 @@ import static edu.wpi.first.units.Units.Second;
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.Interpolatable;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.AngularAccelerationUnit;
 import edu.wpi.first.units.measure.Angle;
@@ -25,6 +31,27 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Velocity;
 
 public final class Constants {
+
+    public static final class VisionConstants {
+        //Camera 1 position and rotation relative to the robot center (in meters and degrees)
+    public static final double frontCamPosX = -0.213;
+    public static final double frontCamPosY = 0.027;
+    public static final double frontCamPosZ = 0.509;
+    public static final double frontCamRotPitch = Units.degreesToRadians(-15);
+    public static final double frontCamRotYaw = Math.PI;
+
+    //Camera 2 position and rotation relative to the robot center (in meters and degrees)
+    public static final double backCamPosX = 0.213;
+    public static final double backCamPosY = 0.110;
+    public static final double backCamPosZ = 0.508;
+    public static final double backCamRotPitch = Units.degreesToRadians(-15);
+    public static final double backCamRotYaw = 0;
+
+    // The standard deviations of our vision estimated poses, which affect correction rate
+    // (Fake values. Experiment and determine estimation noise on an actual robot.)
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+    }
 
     public final static class SwerveConstants{
         public static final double maxDriveSpeed = Units.feetToMeters(14);
@@ -177,4 +204,31 @@ public final class Constants {
         }
     }
 
+    public static final class AutoConstants{
+        //Trench Poses
+        public static final Pose2d RedTrenchRight = new Pose2d(11.9, 7.4, Rotation2d.fromDegrees(0));
+        public static final Pose2d RedTrenchRightI = new Pose2d(12.4, 7.4, Rotation2d.fromDegrees(0));
+        public static final Pose2d RedTrenchLeft = new Pose2d(11.9, 0.7, Rotation2d.fromDegrees(0));
+        public static final Pose2d RedTrenchLeftI = new Pose2d(12.4, 0.7, Rotation2d.fromDegrees(0));
+
+        //point1: blue trench right is x = 4.6, y = 7.4
+        // point2: blue trench right x = 4.6, y = 0.6
+        public static final Pose2d BlueTrenchRight = new Pose2d(4.6, 7.4, Rotation2d.fromDegrees(0));
+        public static final Pose2d BlueTrenchRightI = new Pose2d(5.1, 7.4, Rotation2d.fromDegrees(0));
+        public static final Pose2d BlueTrenchLeft = new Pose2d(4.6, 0.6, Rotation2d.fromDegrees(0));
+        public static final Pose2d BlueTrenchLeftI = new Pose2d(5.1, 0.6, Rotation2d.fromDegrees(0));
+
+        //IMPORTANT Note I stands for intermediate pose for pathplanner
+
+        //Hub Pose
+        public static final Pose2d HubB = new Pose2d(4.6, 4, Rotation2d.fromDegrees(0)); //blue
+        public static final Pose2d HubR = new Pose2d(11.9, 4, Rotation2d.fromDegrees(0)); //red
+
+        //Tower Poses
+        public static final Pose2d TowerB = new Pose2d(1, 3.7, Rotation2d.fromDegrees(0)); //blue
+        public static final Pose2d TowerBI = new Pose2d(2, 3.7, Rotation2d.fromDegrees(0));
+
+        public static final Pose2d TowerR = new Pose2d(15.5, 3.7, Rotation2d.fromDegrees(0)); //red
+        public static final Pose2d TowerRI = new Pose2d(14.5, 3.7, Rotation2d.fromDegrees(0));
+    }
 }

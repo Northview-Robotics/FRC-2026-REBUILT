@@ -18,12 +18,12 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 // import edu.wpi.first.wpilibj.Filesystem;
-
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants.SwerveConstants;
-
+import frc.robot.subsystems.vision.Vision;
 
 //Yagsl
 import java.io.File;
@@ -53,8 +53,10 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 public class Drive extends SubsystemBase
 {
+  private static Drive drive;
   private SwerveDrive swerveDrive;
-//   private File directory = new File(Filesystem.getDeployDirectory(),"swerve2");
+  private Vision vision;
+  private static File directory = new File(Filesystem.getDeployDirectory(),"swerve2");
   private RobotConfig config;
   public boolean isRed;
   private SlewRateLimiter xLim;
@@ -89,7 +91,6 @@ public class Drive extends SubsystemBase
                                                0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
     swerveDrive.setModuleEncoderAutoSynchronize(true,
                                                 1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
-    swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
     
     xLim = new SlewRateLimiter(SwerveConstants.maxAcceleration);
     yLim = new SlewRateLimiter(SwerveConstants.maxAcceleration);
@@ -123,6 +124,20 @@ public class Drive extends SubsystemBase
             },
             this// Reference to this subsystem to set requirements
         );
+  }
+
+  public void setVision(Vision vision) {
+    this.vision = vision;
+  }
+
+  @Override
+  public void periodic()
+  {
+    swerveDrive.updateOdometry();
+    if (vision != null)
+    {
+      vision.updateVision();
+    }
   }
 
   public Drive(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
@@ -354,10 +369,10 @@ public class Drive extends SubsystemBase
     return swerveDrive;
   }
 
-//   public static Drive getInstance(){
-//     if (swerve == null){
-//       swerve = new Drive();
-//     }
-//     return swerve;
-//   }
+  public static Drive getInstance(){
+    if (drive == null){
+      drive = new Drive(directory);
+    }
+    return drive;
+  }
 }
