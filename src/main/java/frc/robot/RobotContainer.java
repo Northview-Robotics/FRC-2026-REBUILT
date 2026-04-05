@@ -113,6 +113,11 @@ public class RobotContainer {
         Commands.waitUntil(shooterWheel::isAtTargetSpeed).alongWith(Commands.waitUntil(hood::isAtAngle)),
         Commands.parallel(indexer.setVelocityCmd(Constants.IndexerConstants.defaultAngularVelocity), feeder.setVelocityCmd(Constants.FeederConstants.defaultAngularVelocity))
     ).withName("ShootCmd"));
+
+    operatorCtrl.leftBumper().onTrue(//idk what button to set, just example rn
+      //Zero subsystems
+      Commands.parallel(hood.setPositionCmd(Degrees.of(0)).until(hood::isAtAngle), intakeAngle.setPositionCmd(Degrees.of(0)).until(intakeAngle::isAtAngle))
+    );
   }
 
   public Command getAutonomousCommand() {

@@ -43,6 +43,8 @@ public class IntakeAngle extends SubsystemBase{
     private final SparkMaxConfig config = new SparkMaxConfig();
     private final SparkClosedLoopController closedLoopController;
 
+    private double targetAngle = 0.0;
+
     private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
             Volts.of(0.5).per(Second), 
@@ -117,22 +119,26 @@ public class IntakeAngle extends SubsystemBase{
         return Rotations.of(motor.getEncoder().getPosition());
     }
 
-    public boolean isAtAngle(Angle targetAngle){
-        return Math.abs(getPosition().in(Rotations) - targetAngle.in(Rotations)) < Constants.IntakePivotConstants.allowedError.in(Rotations);
+    public boolean isAtAngle(){
+        return Math.abs(getPosition().in(Rotations) - targetAngle) < Constants.IntakePivotConstants.allowedError.in(Rotations);
     }
 
     public Command agitateCmd() {
         return Commands.repeatingSequence(
-            setPositionCmd(Constants.IntakePivotConstants.highAgitateAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.highAgitateAngle)),
-            setPositionCmd(Constants.IntakePivotConstants.lowAgitateAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.lowAgitateAngle))
+            // setPositionCmd(Constants.IntakePivotConstants.highAgitateAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.highAgitateAngle)),
+            // setPositionCmd(Constants.IntakePivotConstants.lowAgitateAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.lowAgitateAngle))
+            setPositionCmd(Constants.IntakePivotConstants.highAgitateAngle).until(this::isAtAngle),
+            setPositionCmd(Constants.IntakePivotConstants.lowAgitateAngle).until(this::isAtAngle)
         ).finallyDo(() -> setVoltage(Volts.zero()));
     }
     public Command deployIntake(){
-        return setPositionCmd(Constants.IntakePivotConstants.deployedAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.deployedAngle));
+        // return setPositionCmd(Constants.IntakePivotConstants.deployedAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.deployedAngle));
+        return setPositionCmd(Constants.IntakePivotConstants.deployedAngle).until(this::isAtAngle);
     }
 
     public Command stowIntake(){
-        return setPositionCmd(Constants.IntakePivotConstants.stowedAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.stowedAngle));
+        // return setPositionCmd(Constants.IntakePivotConstants.stowedAngle).until(() -> isAtAngle(Constants.IntakePivotConstants.stowedAngle));
+        return setPositionCmd(Constants.IntakePivotConstants.stowedAngle).until(this::isAtAngle);
     }
 
     public void stopMotor(){
@@ -148,8 +154,9 @@ public class IntakeAngle extends SubsystemBase{
     }
 
     public void setPosition(Angle position){
-        // closedLoopController.setSetpoint(position.in(Rotations), ControlType.kMAXMotionPositionControl);
-        closedLoopController.setSetpoint(position.in(Rotations), ControlType.kPosition, ClosedLoopSlot.kSlot1);
+        targetAngle = position.in(Rotations);
+        // closedLoopController.setSetpoint(position.in(Rotations), ControlType.kMAXMotionPositionControl), ClosedLoopSlot.kSlot1);
+        closedLoopController.setSetpoint(targetAngle, ControlType.kPosition, ClosedLoopSlot.kSlot1);
     }
 
     public Command setSysIdDynamicCmd(Direction direction){

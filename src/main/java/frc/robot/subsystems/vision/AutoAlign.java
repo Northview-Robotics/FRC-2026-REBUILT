@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -36,6 +38,7 @@ public class AutoAlign extends SubsystemBase{
         intermediatePoseMap.put(AutoConstants.BlueTrenchRight, AutoConstants.BlueTrenchRightI);
     }
 
+    @AutoLogOutput
     public Rotation2d getHubHeading(){
         Pose2d botPos = drivetrain.getPose();
         Pose2d hubPos = getHubPos();
@@ -48,6 +51,7 @@ public class AutoAlign extends SubsystemBase{
         return new Rotation2d(targetRadians);
     }
 
+    @AutoLogOutput
     public Distance getHubDist(){
         Pose2d botPos = drivetrain.getPose();
         Pose2d hubPos = getHubPos();

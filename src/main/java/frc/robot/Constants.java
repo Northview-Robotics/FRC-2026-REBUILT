@@ -34,23 +34,23 @@ public final class Constants {
 
     public static final class VisionConstants {
         //Camera 1 position and rotation relative to the robot center (in meters and degrees)
-    public static final double frontCamPosX = -0.213;
-    public static final double frontCamPosY = 0.027;
-    public static final double frontCamPosZ = 0.509;
-    public static final double frontCamRotPitch = Units.degreesToRadians(-15);
-    public static final double frontCamRotYaw = Math.PI;
+        public static final double frontCamPosX = -0.213;
+        public static final double frontCamPosY = 0.027;
+        public static final double frontCamPosZ = 0.509;
+        public static final double frontCamRotPitch = Units.degreesToRadians(-15);
+        public static final double frontCamRotYaw = Math.PI;
 
-    //Camera 2 position and rotation relative to the robot center (in meters and degrees)
-    public static final double backCamPosX = 0.213;
-    public static final double backCamPosY = 0.110;
-    public static final double backCamPosZ = 0.508;
-    public static final double backCamRotPitch = Units.degreesToRadians(-15);
-    public static final double backCamRotYaw = 0;
+        //Camera 2 position and rotation relative to the robot center (in meters and degrees)
+        public static final double backCamPosX = 0.213;
+        public static final double backCamPosY = 0.110;
+        public static final double backCamPosZ = 0.508;
+        public static final double backCamRotPitch = Units.degreesToRadians(-15);
+        public static final double backCamRotYaw = 0;
 
-    // The standard deviations of our vision estimated poses, which affect correction rate
-    // (Fake values. Experiment and determine estimation noise on an actual robot.)
-    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+        // The standard deviations of our vision estimated poses, which affect correction rate
+        // (Fake values. Experiment and determine estimation noise on an actual robot.)
+        public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+        public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     }
 
     public final static class SwerveConstants{
@@ -200,11 +200,15 @@ public final class Constants {
 
         public static final InterpolatingTreeMap<Double, ShooterParams> map = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), ShooterParams::interpolate);
         static {
-            //TODO Fill this LUT with actual values. The distance is in meters, flywheelRPM is in RPM, hoodAngle is in degrees, and tof is in seconds.
+            //TODO Go to distance and set rpm and hood angle and record the time of flight. Do this for multiple distances and fill the tof in ShooterParams.
             //map.put(distance, new ShooterParams(flywheelRPM, hoodAngle, tof));
-            map.put(1.0, new ShooterParams(1000, 10, 1.0));
-            map.put(2.0, new ShooterParams(2000, 20, 1.5));
-            map.put(3.0, new ShooterParams(3000, 30, 2.0));
+            map.put(1.45, new ShooterParams(1415.0, 20, 1.0));//tof is a fake value. Please replace it with actual time of flight from testing.
+            map.put(1.76, new ShooterParams(1435.0, 22, 1.5));
+            map.put(2.07, new ShooterParams(1445.0, 24, 2.0));
+            map.put(2.38, new ShooterParams(1465.0, 26, 2.0));
+            map.put(2.69, new ShooterParams(1485.0, 28, 2.0));
+            map.put(3.0, new ShooterParams(1500.0, 30, 2.0));
+            map.put(3.31, new ShooterParams(1520.0, 32, 2.0));
         }
     }
 
