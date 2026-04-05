@@ -57,7 +57,7 @@ public class IntakeRollers extends SubsystemBase{
             .withStatorCurrentLimitEnable(true);
         
         motorConfig.MotorOutput
-            .withNeutralMode(NeutralModeValue.Brake)
+            .withNeutralMode(NeutralModeValue.Coast)
             //TODO Adjust Inverted based on irl intake rollers
             .withInverted(InvertedValue.Clockwise_Positive);
         
@@ -66,7 +66,7 @@ public class IntakeRollers extends SubsystemBase{
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
         
         motorConfig.Slot0
-                .withKP(0.0)
+                .withKP(0.01)
                 .withKI(0.0)
                 .withKD(0.0)
                 .withKS(0.0)

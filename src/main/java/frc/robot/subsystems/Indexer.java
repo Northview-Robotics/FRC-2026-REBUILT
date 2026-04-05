@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -34,6 +35,7 @@ public class Indexer extends SubsystemBase{
     private final MotionMagicVelocityVoltage velCtrl = new MotionMagicVelocityVoltage(0)
         .withAcceleration(Constants.IndexerConstants.acceleration);
 
+    private double targetRPM = 0.0;
     private double timeout = 0;
 
     private SysIdRoutine sysIdRoutine = new SysIdRoutine(
@@ -56,15 +58,15 @@ public class Indexer extends SubsystemBase{
             .withStatorCurrentLimitEnable(true);
 
         motorConfig.Slot0
-                .withKP(0.0)
+                .withKP(0.0001)
                 .withKI(0.0)
                 .withKD(0.0)
-                .withKS(0.0)
-                .withKV(0.0)
-                .withKA(0.0);
+                .withKS(0.27937)
+                .withKV(0.089836)
+                .withKA(0.014557);
 
         motorConfig.MotorOutput
-            .withNeutralMode(NeutralModeValue.Brake)
+            .withNeutralMode(NeutralModeValue.Coast)
             //TODO Adjust Inverted based on irl indexer
             .withInverted(InvertedValue.Clockwise_Positive);
 
@@ -104,15 +106,25 @@ public class Indexer extends SubsystemBase{
         motor.setControl(voltCtrl.withOutput(voltage));
     }
 
-    public void setVelocity(AngularVelocity velocity){
+    public void setVelocity(double rpm){
+        double targetRPM = rpm;
         if(motor.getTorqueCurrent().getValueAsDouble() > Constants.IndexerConstants.ejectCurrent){
             timeout = Timer.getFPGATimestamp();
         }
         if(Timer.getFPGATimestamp() - timeout > Constants.IndexerConstants.ejectTimeout){
-            motor.setControl(velCtrl.withVelocity(velocity));
+            motor.setControl(velCtrl.withVelocity(targetRPM/60));
         } else {
-            motor.setControl(velCtrl.withVelocity(Constants.IndexerConstants.ejectRPM));
+            motor.setControl(velCtrl.withVelocity(Constants.IndexerConstants.ejectRPM/60));
         }
+    }
+
+    public void stop(){
+        motor.setVoltage(0);
+    }
+
+    public boolean isAtTargetSpeed() {
+        double currentRPM = motor.getVelocity().getValue().in(Units.RPM);
+        return Math.abs(currentRPM - targetRPM) < Constants.IndexerConstants.acceptableDeltaRPM;
     }
 
     public Command setSysIdDynamicCmd(Direction direction){
@@ -129,7 +141,7 @@ public class Indexer extends SubsystemBase{
             () -> setVoltage(Volts.of(0)));
     }
 
-    public Command setVelocityCmd(AngularVelocity velocity){
+    public Command setVelocityCmd(double velocity){
         return this.runEnd(
             () -> setVelocity(velocity),
             () -> setVoltage(Volts.of(0)));

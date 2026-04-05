@@ -21,6 +21,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -74,7 +76,7 @@ public class IntakeAngle extends SubsystemBase{
 
         //Position Control in Slot 1
         config.closedLoop
-            .pid(positionPID.getP(), positionPID.getI(), positionPID.getD(), ClosedLoopSlot.kSlot1)
+            .pid(positionPID.getP(), positionPID.getI(), positionPID.getD(), ClosedLoopSlot.kSlot1).outputRange(-1, 1)
             .feedForward
             .svacr(positionFF.getKs(), positionFF.getKv(), positionFF.getKa(), positionFF.getKg(), 1, ClosedLoopSlot.kSlot1);
         
@@ -82,7 +84,11 @@ public class IntakeAngle extends SubsystemBase{
             .maxMotion
             .cruiseVelocity(Constants.IntakePivotConstants.cruiseVelocity.in(Rotations.per(Minute)), ClosedLoopSlot.kSlot1)
             .maxAcceleration(Constants.IntakePivotConstants.maxAcceleration.in(Rotations.per(Minute).per(Second)), ClosedLoopSlot.kSlot1)
-            .allowedProfileError(Constants.IntakePivotConstants.allowedError.in(Rotations), ClosedLoopSlot.kSlot1);
+            .allowedProfileError(Constants.IntakePivotConstants.allowedError.in(Rotations), ClosedLoopSlot.kSlot1)
+            .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+
+        config.inverted(true);
+        config.idleMode(IdleMode.kBrake);
 
         //TODO When setting current limits, set ResetMode to RestMode.kNoResetSafeParameters
         motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -142,6 +148,7 @@ public class IntakeAngle extends SubsystemBase{
     }
 
     public void setPosition(Angle position){
+        // closedLoopController.setSetpoint(position.in(Rotations), ControlType.kMAXMotionPositionControl);
         closedLoopController.setSetpoint(position.in(Rotations), ControlType.kPosition, ClosedLoopSlot.kSlot1);
     }
 

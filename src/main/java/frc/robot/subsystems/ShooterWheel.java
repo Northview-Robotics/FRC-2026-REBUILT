@@ -79,12 +79,12 @@ public class ShooterWheel extends SubsystemBase {
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
         
         motorConfig.Slot0
-                .withKP(0.0)
+                .withKP(0.17053)
                 .withKI(0.0)
                 .withKD(0.0)
-                .withKS(0.0)
-                .withKV(0.0)
-                .withKA(0.0);
+                .withKS(0.11706)
+                .withKV(0.12336)
+                .withKA(0.01);
 
         motorConfig.MotionMagic
             .withMotionMagicCruiseVelocity(Constants.ShooterWheelConstants.cruiseVelocity)
@@ -159,6 +159,10 @@ public class ShooterWheel extends SubsystemBase {
 
     public boolean atSetpoint() {
         return Math.abs(getError()) < 50;
+    }
+
+    public void stop() {
+        motor1.setVoltage(0);
     }
 
     public Command setSysIdDynamicCmd(Direction direction) {

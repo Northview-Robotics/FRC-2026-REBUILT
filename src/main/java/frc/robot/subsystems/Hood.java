@@ -21,6 +21,8 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -75,7 +77,7 @@ public class Hood extends SubsystemBase{
 
         //Position Control in Slot 1
         config.closedLoop
-            .pid(positionPID.getP(), positionPID.getI(), positionPID.getD(), ClosedLoopSlot.kSlot1)
+            .pid(positionPID.getP(), positionPID.getI(), positionPID.getD(), ClosedLoopSlot.kSlot1).outputRange(-1, 1)
             .feedForward
             .svacr(positionFF.getKs(), positionFF.getKv(), positionFF.getKa(), positionFF.getKg(), 1, ClosedLoopSlot.kSlot1);
         
@@ -83,7 +85,12 @@ public class Hood extends SubsystemBase{
             .maxMotion
             .cruiseVelocity(Constants.HoodConstants.cruiseVelocity.in(Rotations.per(Minute)), ClosedLoopSlot.kSlot1)
             .maxAcceleration(Constants.HoodConstants.maxAcceleration.in(Rotations.per(Minute).per(Second)), ClosedLoopSlot.kSlot1)
-            .allowedProfileError(Constants.HoodConstants.allowedError.in(Rotations), ClosedLoopSlot.kSlot1);
+            .allowedProfileError(Constants.HoodConstants.allowedError.in(Rotations), ClosedLoopSlot.kSlot1)
+            .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal);
+
+        config.inverted(true);
+        config.idleMode(IdleMode.kBrake);
+
 
         //TODO When setting current limits, set ResetMode to RestMode.kNoResetSafeParameters
         motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -118,6 +125,10 @@ public class Hood extends SubsystemBase{
         setPosition(Degrees.of(targetAngle));
     }
 
+    public void stop(){
+        motor.setVoltage(Volts.zero());
+    }
+
     public boolean isAtAngle(){
         return Math.abs(getPosition().in(Rotations) - Degrees.of(targetAngle).in(Rotations)) < Constants.IntakePivotConstants.allowedError.in(Rotations);
     }
@@ -131,6 +142,7 @@ public class Hood extends SubsystemBase{
     }
 
     public void setPosition(Angle position){
+        // closedLoopController.setSetpoint(position.in(Rotations), ControlType.kMAXMotionPositionControl);
         closedLoopController.setSetpoint(position.in(Rotations), ControlType.kPosition, ClosedLoopSlot.kSlot1);
     }
 

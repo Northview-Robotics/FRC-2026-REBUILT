@@ -51,7 +51,7 @@ public class Feeder extends SubsystemBase {
             .withStatorCurrentLimitEnable(true);
 
         motorConfig.Slot0
-                .withKP(0.0)
+                .withKP(0.001)
                 .withKI(0.0)
                 .withKD(0.0)
                 .withKS(0.0)
@@ -59,7 +59,7 @@ public class Feeder extends SubsystemBase {
                 .withKA(0.0);
 
         motorConfig.MotorOutput
-            .withNeutralMode(NeutralModeValue.Brake)
+            .withNeutralMode(NeutralModeValue.Coast)
             //TODO Adjust Inverted based on irl feeder
             .withInverted(InvertedValue.Clockwise_Positive);
 
@@ -97,6 +97,10 @@ public class Feeder extends SubsystemBase {
     public void setVelocity(AngularVelocity velocity){
         motor.setControl(velCtrl.withVelocity(velocity));
 
+    }
+
+    public void stop(){
+        motor.setVoltage(0);
     }
 
     public Command setSysIdDynamicCmd(Direction direction){
