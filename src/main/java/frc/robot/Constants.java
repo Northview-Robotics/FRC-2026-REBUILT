@@ -58,6 +58,8 @@ public final class Constants {
         public static final double maxAcceleration = 5;
         public static final double deadband = 0.075;
 
+        public static final Pose2d resetPose = new Pose2d(0,0, new Rotation2d());
+
         //Pathplanner Constants
         public static final class Rotation {
             public static final PIDConstants PID = new PIDConstants(0.4, 0.0, 0);
@@ -79,6 +81,8 @@ public final class Constants {
         public static final AngularVelocity cruiseVelocity = Rotations.per(Minute).of(3000);
         public static final AngularAcceleration acceleration = Rotations.per(Minute).per(Second).of(6000);
         public static final Velocity<AngularAccelerationUnit> jerk = Rotations.per(Minute).per(Second).per(Second).of(12000);
+
+        public static final AngularVelocity defaultAngularVelocity = Rotations.per(Minute).of(3000);
     }
 
     public final static class IntakePivotConstants{

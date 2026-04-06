@@ -44,6 +44,7 @@ public class IntakeAngle extends SubsystemBase{
     private final SparkClosedLoopController closedLoopController;
 
     private double targetAngle = 0.0;
+    private boolean deployed;
 
     private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -201,5 +202,16 @@ public class IntakeAngle extends SubsystemBase{
         return this.runEnd(
             () -> setPosition(position.get()), 
             () -> setVoltage(Volts.zero()));
+    }
+
+    public Command toggleIntake(){
+        return this.run(() -> {
+            if(deployed){
+                setPosition(Constants.IntakePivotConstants.stowedAngle);
+            } else {
+                setPosition(Constants.IntakePivotConstants.deployedAngle);
+            }
+            deployed = !deployed;
+        });
     }
 }

@@ -5,12 +5,13 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Volts;
 
 import java.io.File;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,14 +27,14 @@ import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.IntakeAngle;
 import frc.robot.subsystems.IntakeRollers;
 import frc.robot.subsystems.ShooterWheel;
+import frc.robot.subsystems.vision.AutoAlign;
 import swervelib.SwerveInputStream;
 
 public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
 
-  private final CommandXboxController driverCtrl = new CommandXboxController(0);
-  private final CommandXboxController operatorCtrl = new CommandXboxController(1);
+  private final CommandXboxController driver = new CommandXboxController(0);
 
   private final IntakeRollers intakeRollers = new IntakeRollers(Constants.IntakeRollersConstants.intakeRollerID, Constants.IntakeRollersConstants.gearRatio);
   private final IntakeAngle intakeAngle = new IntakeAngle(Constants.IntakePivotConstants.intakePivotID);
@@ -50,15 +51,15 @@ public class RobotContainer {
   private final Drive drivetrain = new Drive(directory);
 
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-                                                              () -> -driverCtrl.getLeftY(), 
-                                                              () -> -driverCtrl.getLeftX())
-                                                              .withControllerRotationAxis(driverCtrl::getRightX)
+                                                              () -> -driver.getLeftY(), 
+                                                              () -> -driver.getLeftX())
+                                                              .withControllerRotationAxis(driver::getRightX)
                                                               .deadband(SwerveConstants.deadband)
                                                               .scaleTranslation(0.8)
                                                               .allianceRelativeControl(true);
 
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(driverCtrl::getRightX,
-                                                                                              driverCtrl::getRightY).headingWhile(true);
+  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(driver::getRightX,
+                                                                                              driver::getRightY).headingWhile(true);
 
   SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
                                                                       .allianceRelativeControl(false);
@@ -80,19 +81,24 @@ public class RobotContainer {
     Command driveHubAlign = drivetrain.driveAlignedHubCommand(driveAngularVelocity);
     
     drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-    driverCtrl.a().whileTrue(driveHubAlign);
-    
-    //Example Intake Roller Bindings
-    operatorCtrl.a().whileTrue(intakeRollers.setVoltageCmd(Volts.of(6)));
-    operatorCtrl.b().whileTrue(intakeRollers.setVoltageCmd(Volts.of(-6)));
+    driver.leftBumper().whileTrue(driveHubAlign);
+  
+    driver.rightTrigger().whileTrue(Commands.sequence(
+        Commands.parallel(shooterWheel.shootCmd(AutoAlign.getInstance().getHubDist().baseUnitMagnitude()), hood.setShootAngleCmd(AutoAlign.getInstance().getHubDist().baseUnitMagnitude())),
+        Commands.waitUntil(shooterWheel::isAtTargetSpeed).alongWith(Commands.waitUntil(hood::isAtAngle)),
+        Commands.parallel(indexer.setVelocityCmd(Constants.IndexerConstants.defaultAngularVelocity), feeder.setVelocityCmd(Constants.FeederConstants.defaultAngularVelocity))
+    ).withName("ShootCmd"));
 
-    operatorCtrl.x().onTrue(intakeAngle.setPositionCmd(Degrees.of(0)));
-    operatorCtrl.y().onTrue(intakeAngle.setPositionCmd(Degrees.of(90)));
+    driver.rightBumper().onTrue(intakeAngle.toggleIntake());
 
-    operatorCtrl.povUpRight().whileTrue(indexer.setVoltageCmd(Volts.of(6)));// idk sigmasigmasigmasigma
-    
-    // TOOD: Constant RPM. Use Double Supplier with shootermap at some point
-    // operatorCtrl.rightBumper().whileTrue(shooterWheel.setVelocityCmd(2000));
+    driver.leftTrigger().whileTrue(intakeRollers.setVelocityCmd(Constants.IntakeRollersConstants.defaultAngularVelocity));
+
+    driver.back().onTrue(
+      //Home IntakeAngle and Hood
+      Commands.parallel(hood.setPositionCmd(Degrees.of(0)).until(hood::isAtAngle), intakeAngle.setPositionCmd(Degrees.of(0)).until(intakeAngle::isAtAngle))
+    );
+
+    driver.start().onTrue(Commands.runOnce(() -> drivetrain.resetOdometry(Constants.SwerveConstants.resetPose)));
 
     // Example shooting command
     // Our shoot cmd should look something like this
@@ -106,18 +112,7 @@ public class RobotContainer {
     //                 indexer.setVoltageCmd(Volts.of(6))))
     //         .withName("ShootCmd"));
 
-    //TODO configure other bindings after zain gives button map
 
-    operatorCtrl.rightBumper().whileTrue(Commands.sequence(
-        Commands.parallel(shooterWheel.shootCmd(2.0),hood.setShootAngleCmd(2.0)),
-        Commands.waitUntil(shooterWheel::isAtTargetSpeed).alongWith(Commands.waitUntil(hood::isAtAngle)),
-        Commands.parallel(indexer.setVelocityCmd(Constants.IndexerConstants.defaultAngularVelocity), feeder.setVelocityCmd(Constants.FeederConstants.defaultAngularVelocity))
-    ).withName("ShootCmd"));
-
-    operatorCtrl.leftBumper().onTrue(//idk what button to set, just example rn
-      //Zero subsystems
-      Commands.parallel(hood.setPositionCmd(Degrees.of(0)).until(hood::isAtAngle), intakeAngle.setPositionCmd(Degrees.of(0)).until(intakeAngle::isAtAngle))
-    );
   }
 
   public Command getAutonomousCommand() {
