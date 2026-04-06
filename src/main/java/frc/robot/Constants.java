@@ -204,15 +204,14 @@ public final class Constants {
 
         public static final InterpolatingTreeMap<Double, ShooterParams> map = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), ShooterParams::interpolate);
         static {
-            //TODO Go to distance and set rpm and hood angle and record the time of flight. Do this for multiple distances and fill the tof in ShooterParams.
             //map.put(distance, new ShooterParams(flywheelRPM, hoodAngle, tof));
-            map.put(1.45, new ShooterParams(1415.0, 20, 1.0));//tof is a fake value. Please replace it with actual time of flight from testing.
-            map.put(1.76, new ShooterParams(1435.0, 22, 1.5));
-            map.put(2.07, new ShooterParams(1445.0, 24, 2.0));
-            map.put(2.38, new ShooterParams(1465.0, 26, 2.0));
-            map.put(2.69, new ShooterParams(1485.0, 28, 2.0));
-            map.put(3.0, new ShooterParams(1500.0, 30, 2.0));
-            map.put(3.31, new ShooterParams(1520.0, 32, 2.0));
+            map.put(1.45, new ShooterParams(1415.0, 20, 0.663));//values from original code
+            map.put(1.76, new ShooterParams(1435.0, 22, 0.711));
+            map.put(2.07, new ShooterParams(1445.0, 24, 0.758));
+            map.put(2.38, new ShooterParams(1465.0, 26, 0.81));
+            map.put(2.69, new ShooterParams(1485.0, 28, 0.862));
+            map.put(3.0, new ShooterParams(1500.0, 30, 0.913));
+            map.put(3.31, new ShooterParams(1520.0, 32, 0.928));
         }
     }
 

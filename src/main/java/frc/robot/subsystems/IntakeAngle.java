@@ -44,7 +44,7 @@ public class IntakeAngle extends SubsystemBase{
     private final SparkClosedLoopController closedLoopController;
 
     private double targetAngle = 0.0;
-    private boolean deployed;
+    private boolean deployed = false;
 
     private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(
